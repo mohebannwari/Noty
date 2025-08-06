@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 90;
 	objects = {
 
 /* Begin PBXFileReference section */
@@ -34,10 +34,8 @@
 /* Begin PBXFrameworksBuildPhase section */
 		32921E052E424DC0006A7C11 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -71,14 +69,10 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				32921E0A2E424DC0006A7C11 /* Noty */,
 			);
 			name = Noty;
-			packageProductDependencies = (
-			);
 			productName = Noty;
 			productReference = 32921E082E424DC0006A7C11 /* Noty.app */;
 			productType = "com.apple.product-type.application";
@@ -107,7 +101,7 @@
 			);
 			mainGroup = 32921DFF2E424DC0006A7C11;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 90;
 			productRefGroup = 32921E092E424DC0006A7C11 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -120,25 +114,21 @@
 /* Begin PBXResourcesBuildPhase section */
 		32921E062E424DC0006A7C11 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		32921E042E424DC0006A7C11 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		32921E112E424DC1006A7C11 /* Debug */ = {
+		32921E112E424DC1006A7C11 /* Debug configuration for PBXProject "Noty" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -202,7 +192,7 @@
 			};
 			name = Debug;
 		};
-		32921E122E424DC1006A7C11 /* Release */ = {
+		32921E122E424DC1006A7C11 /* Release configuration for PBXProject "Noty" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -258,7 +248,7 @@
 			};
 			name = Release;
 		};
-		32921E142E424DC1006A7C11 /* Debug */ = {
+		32921E142E424DC1006A7C11 /* Debug configuration for PBXNativeTarget "Noty" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -293,7 +283,7 @@
 			};
 			name = Debug;
 		};
-		32921E152E424DC1006A7C11 /* Release */ = {
+		32921E152E424DC1006A7C11 /* Release configuration for PBXNativeTarget "Noty" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -334,19 +324,17 @@
 		32921E032E424DC0006A7C11 /* Build configuration list for PBXProject "Noty" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				32921E112E424DC1006A7C11 /* Debug */,
-				32921E122E424DC1006A7C11 /* Release */,
+				32921E112E424DC1006A7C11 /* Debug configuration for PBXProject "Noty" */,
+				32921E122E424DC1006A7C11 /* Release configuration for PBXProject "Noty" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		32921E132E424DC1006A7C11 /* Build configuration list for PBXNativeTarget "Noty" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				32921E142E424DC1006A7C11 /* Debug */,
-				32921E152E424DC1006A7C11 /* Release */,
+				32921E142E424DC1006A7C11 /* Debug configuration for PBXNativeTarget "Noty" */,
+				32921E152E424DC1006A7C11 /* Release configuration for PBXNativeTarget "Noty" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */

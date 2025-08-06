@@ -303,4 +303,10 @@ struct GeneratedComponent: View {
 - **Animation Logic**: Explain animation state changes
 - **Asset Usage**: Document custom asset requirements
 
+## 10. Coding Guidelines
+
+### Styling Memory
+- Always work with the newest `.glassEffect()`
+- **Overwrite the design styles of figma components with liquid glass where possible, as long as the new SDK is provided!**
+
 This design system ensures consistent, maintainable, and scalable UI development while enabling seamless Figma integration through the Model Context Protocol.

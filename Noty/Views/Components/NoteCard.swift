@@ -9,6 +9,7 @@ import SwiftUI
 
 struct NoteCard: View {
     let note: Note
+    @State private var isHovering = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -30,15 +31,32 @@ struct NoteCard: View {
                     
                     Spacer()
                     
-                    Button(action: {}) {
+                    Menu {
+                        Button {
+                            // Pin functionality will be implemented later
+                        } label: {
+                            Label("Pin Note", systemImage: "pin")
+                        }
+                        
+                        Button {
+                            // Move to folder functionality will be implemented later
+                        } label: {
+                            Label("Move to Folder", systemImage: "folder")
+                        }
+                        
+                        Divider()
+                        
+                        Button("Delete", role: .destructive) {
+                            // Delete functionality will be implemented later
+                        }
+                    } label: {
                         Image(systemName: "ellipsis")
                             .font(.system(size: 10))
                             .foregroundColor(Color(red: 0.322, green: 0.322, blue: 0.357))
+                            .frame(width: 20, height: 20)
+                            .glassEffect(.regular.interactive(), in: Circle())
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .frame(width: 20, height: 20)
-                    .background(Color(red: 0.102, green: 0.102, blue: 0.102, opacity: 0.06))
-                    .clipShape(Capsule())
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
@@ -91,8 +109,8 @@ struct NoteCard: View {
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color(red: 0.376, green: 0.647, blue: 0.980, opacity: 0.35))
                             .background(.ultraThinMaterial, in: Capsule())
+                            .background(Color(red: 0.376, green: 0.647, blue: 0.980, opacity: 0.2))
                             .clipShape(Capsule())
                         }
                         Spacer()
@@ -104,9 +122,23 @@ struct NoteCard: View {
         .frame(width: 222, height: 182, alignment: .topLeading)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 24))
-        .shadow(color: Color.black.opacity(0.02), radius: 9.5, x: 0, y: 9)
-        .shadow(color: Color.black.opacity(0.02), radius: 17.5, x: 0, y: 35)
-        .shadow(color: Color.black.opacity(0.01), radius: 23.5, x: 0, y: 78)
+        .scaleEffect(isHovering ? 1.02 : 1.0)
+        .shadow(
+            color: Color.black.opacity(isHovering ? 0.08 : 0.04),
+            radius: isHovering ? 20 : 12,
+            x: 0,
+            y: isHovering ? 12 : 6
+        )
+        .shadow(
+            color: Color.black.opacity(0.02),
+            radius: 30,
+            x: 0,
+            y: 15
+        )
+        .onHover { hovering in
+            isHovering = hovering
+        }
+        .animation(.easeInOut, value: isHovering)
     }
     
     private var dateFormatter: DateFormatter {
