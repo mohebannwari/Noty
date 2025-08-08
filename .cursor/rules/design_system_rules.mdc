@@ -98,6 +98,45 @@ withAnimation(.bouncy(duration: 0.6)) {
 .animation(.bouncy(duration: 0.6), value: stateVariable)
 ```
 
+### Liquid Glass Morphing Animation
+For proper morphing animations between Liquid Glass elements:
+
+```swift
+struct LiquidGlassMorphingExample: View {
+    @State private var elementCount: Int = 1
+    @Namespace private var glassNamespace
+    
+    var body: some View {
+        GlassEffectContainer(spacing: 40) {
+            HStack(spacing: 40) {
+                // Each glass element needs unique glassEffectID
+                Element1()
+                    .glassEffect()
+                    .glassEffectID("element1", in: glassNamespace)
+                
+                if elementCount > 1 {
+                    Element2()
+                        .glassEffect()
+                        .glassEffectID("element2", in: glassNamespace)
+                }
+            }
+        }
+        
+        Button("Morph") {
+            withAnimation(.bouncy) {
+                elementCount = (elementCount % 3) + 1
+            }
+        }
+    }
+}
+```
+
+**Key Requirements**:
+- Use `GlassEffectContainer` for morphing elements
+- Assign unique `glassEffectID` with shared `@Namespace`
+- Use `withAnimation(.bouncy)` for fluid transitions
+- State changes trigger automatic morphing
+
 ## Asset Integration Rules
 
 ### Image Assets

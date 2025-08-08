@@ -51,10 +51,10 @@ struct NoteCard: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis")
-                            .font(.system(size: 10))
-                            .foregroundColor(Color(red: 0.322, green: 0.322, blue: 0.357))
-                            .frame(width: 20, height: 20)
-                            .glassEffect(.regular.interactive(), in: Circle())
+                            .font(.system(size: 12))
+                            .foregroundColor(Color(red: 0.102, green: 0.102, blue: 0.102, opacity: 0.7))
+                            .frame(width: 24, height: 24)
+                            .background(Color(red: 0.102, green: 0.102, blue: 0.102, opacity: 0.06), in: Circle())
                     }
                     .buttonStyle(PlainButtonStyle())
                 }

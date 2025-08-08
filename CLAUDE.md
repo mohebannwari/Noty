@@ -210,6 +210,43 @@ withAnimation(.bouncy(duration: 0.6)) {
 .animation(.bouncy(duration: 0.6), value: stateVariable)
 ```
 
+### Liquid Glass Morphing Animations
+For morphing between glass elements, follow Apple's morphing pattern:
+
+```swift
+struct ComponentWithMorphing: View {
+    @State private var morphState: Bool = false
+    @Namespace private var glassNamespace
+    
+    var body: some View {
+        GlassEffectContainer(spacing: 12) {
+            VStack(spacing: 12) {
+                if morphState {
+                    SearchResults()
+                        .glassEffect(.regular)
+                        .glassEffectID("searchResults", in: glassNamespace)
+                }
+                
+                SearchInput()
+                    .glassEffect(.regular.interactive())
+                    .glassEffectID("searchInput", in: glassNamespace)
+            }
+        }
+        .onChange(of: searchText) {
+            withAnimation(.bouncy) {
+                morphState = !searchText.isEmpty
+            }
+        }
+    }
+}
+```
+
+**Requirements for Morphing**:
+- Use `GlassEffectContainer` wrapper
+- Assign unique `glassEffectID` with shared `@Namespace`  
+- Use `withAnimation(.bouncy)` for state transitions
+- State changes automatically trigger glass morphing
+
 ## 7. Project Structure
 
 ### File Organization

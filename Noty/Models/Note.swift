@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Note: Identifiable, Codable {
+struct Note: Identifiable, Codable, Equatable {
     var id = UUID()
     var title: String
     var content: String
