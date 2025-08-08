@@ -21,6 +21,8 @@ struct FloatingSearch: View {
     @State private var searchText = ""
     @FocusState private var isSearchFocused: Bool
     @Namespace private var searchNamespace
+    @State private var hoveredResultID: SearchHit.ID?
+    @State private var isHoveringCollapsedPill = false
     
     var body: some View {
         // Keep a single surface that grows vertically; avoids jumping
@@ -49,6 +51,15 @@ struct FloatingSearch: View {
         case .withResults:
             return 24
         }
+    }
+
+    // Inner hover highlight radius follows concentricity of the container's liquid glass
+    private var hoverCornerRadius: CGFloat {
+        // Min inset from container to hover background at corners:
+        // horizontal: results padding (12) + row padding (6) = 18
+        // vertical (top/bottom): results padding (12)
+        let inset = CGFloat(12) // use the limiting inset for concentric rounding (min of 12 and 18)
+        return max(6, currentCornerRadius - inset)
     }
     
     @ViewBuilder
@@ -80,11 +91,21 @@ struct FloatingSearch: View {
                 RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
                     .fill(.ultraThinMaterial)
                     .applyGlassEffect()
-                    // Enable smooth morph into the expanded bar
                     .matchedGeometryEffect(id: "searchSurface", in: searchNamespace)
+            )
+            .scaleEffect(isHoveringCollapsedPill ? 1.05 : 1.0)
+            .shadow(
+                color: Color.black.opacity(isHoveringCollapsedPill ? 0.12 : 0.05),
+                radius: isHoveringCollapsedPill ? 6 : 3,
+                x: 0,
+                y: isHoveringCollapsedPill ? 3 : 1.5
             )
         }
         .buttonStyle(.plain)
+        .onHover { hovering in
+            isHoveringCollapsedPill = hovering
+        }
+        .animation(.easeInOut, value: isHoveringCollapsedPill)
     }
     
     // Expanded search bar
@@ -95,10 +116,6 @@ struct FloatingSearch: View {
                 VStack(spacing: 0) {
                     ForEach(engine.results) { result in
                         resultRow(result)
-                        if result.id != engine.results.last?.id {
-                            Divider()
-                                .padding(.leading, 44) // indent under thumbnail
-                        }
                     }
                 }
                 .padding(.top, 12)
@@ -106,7 +123,7 @@ struct FloatingSearch: View {
                 .padding(.bottom, 12) // 12px gap to input field below
             }
 
-            // Bottom row: icon, field, close
+            // Bottom row: icon, field, trailing action (contextual)
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 16))
@@ -117,16 +134,17 @@ struct FloatingSearch: View {
                     .foregroundColor(Color(red: 0.102, green: 0.102, blue: 0.102))
                     .focused($isSearchFocused)
                     .textFieldStyle(.plain)
-
-                Button(action: closeSearch) {
-                    Image(systemName: searchText.isEmpty ? "xmark.circle" : "xmark.circle.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(Color(red: 0.102, green: 0.102, blue: 0.102, opacity: 0.6))
+                // Show a delete icon only when results are visible; hide in pure expanded state
+                if searchState == .withResults {
+                    Button(action: { searchText = "" }) {
+                        Image(systemName: "delete.left.fill")
+                            .font(.system(size: 18))
+                            .background(Color("#000000"))                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.vertical, 12)
         }
         .background(
             Group {
@@ -155,14 +173,18 @@ struct FloatingSearch: View {
                     RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
                         .fill(.ultraThinMaterial)
                         .applyGlassEffect()
-                        // Only match geometry while in expanded (no results) to avoid ghost ellipse
                         .matchedGeometryEffect(id: "searchSurface", in: searchNamespace)
                 }
             }
         )
         .clipShape(RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous))
         .compositingGroup()
-        .frame(maxWidth: 400)
+        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1.5)
+        .frame(maxWidth: 300)
+        // ESC to close the bar (replaces 'x' in expanded state)
+        .onExitCommand {
+            closeSearch()
+        }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 isSearchFocused = true
@@ -171,7 +193,8 @@ struct FloatingSearch: View {
     }
     
     private func resultRow(_ result: SearchHit) -> some View {
-        HStack(spacing: 12) {
+        let isHovered = hoveredResultID == result.id
+        return HStack(spacing: 12) {
             // Asset-based thumbnail
             Image("note-card-thumbnail")
                 .resizable()
@@ -185,9 +208,29 @@ struct FloatingSearch: View {
                 .lineLimit(1)
 
             Spacer()
+
+            // Hover affordance to indicate navigation
+            Image(systemName: "arrow.right.circle.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .background(Color("#000000"))
+                .opacity(isHovered ? 1 : 0)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            Group {
+                if isHovered {
+                    RoundedRectangle(cornerRadius: hoverCornerRadius, style: .continuous)
+                        .fill(Color(red: 0.925, green: 0.925, blue: 0.925)) // #ECECEC
+                }
+            }
+        )
         .contentShape(Rectangle())
+        .onHover { hovering in
+            hoveredResultID = hovering ? result.id : (hoveredResultID == result.id ? nil : hoveredResultID)
+        }
+        .animation(.easeInOut(duration: 0.15), value: isHovered)
     }
     
     // MARK: - Actions
