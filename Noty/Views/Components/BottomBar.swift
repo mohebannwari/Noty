@@ -10,6 +10,7 @@ import SwiftUI
 struct BottomBar: View {
     @State private var isHoveringNewNote = false
     @State private var isHoveringTheme = false
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -24,14 +25,14 @@ struct BottomBar: View {
                 HStack(spacing: 8) {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 16))
-                        .foregroundColor(.white)
+                        .foregroundColor(Color("ButtonPrimaryTextColor"))
                     Text("New note")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(Color("ButtonPrimaryTextColor"))
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
-                .background(Color.black, in: Capsule())
+                .background(Color("ButtonPrimaryBgColor"), in: Capsule())
                 .scaleEffect(isHoveringNewNote ? 1.05 : 1.0)
                 .shadow(
                     color: Color.black.opacity(isHoveringNewNote ? 0.12 : 0.08),
@@ -50,11 +51,11 @@ struct BottomBar: View {
 
             // Independent: Bottom-right Theme toggle
             Button {
-                // Theme toggle functionality will be implemented
+                themeManager.toggleTheme()
             } label: {
                 Image(systemName: "circle.lefthalf.filled")
                     .font(.system(size: 16))
-                    .foregroundColor(Color(red: 0.102, green: 0.102, blue: 0.102))
+                    .foregroundColor(Color("PrimaryTextColor"))
                     .frame(width: 40, height: 40)
                     .adaptiveGlass(in: Circle())
                     .scaleEffect(isHoveringTheme ? 1.1 : 1.0)

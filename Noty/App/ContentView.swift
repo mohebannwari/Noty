@@ -36,6 +36,9 @@ extension View {
 struct ContentView: View {
     // Search will be redesigned; removing old manager
     @StateObject private var searchEngine = SearchEngine()
+    @StateObject private var themeManager = ThemeManager()
+    @State private var selectedNote: Note?
+    @State private var isNoteDetailPresented = false
     @State private var sampleNotes: [Note] = [
         Note(title: "Recent activities",
              content: "The rain pattered softly against the attic window as I opened my journal. Dust motes danced in the single shaft of sunlight illuminating the aged pages. I picked up my pen, the nib scratching against the paper as I began to write. Today, I stumbled upon an old music box in the antique shop. Its melody was hauntingly familiar, like a forgotten dream.",
@@ -78,24 +81,39 @@ struct ContentView: View {
                 ScrollView {
                     LazyVGrid(columns: Array(repeating: GridItem(.fixed(222), spacing: 12), count: 4), spacing: 12) {
                         ForEach(displayedNotes) { note in
-                            NoteCard(note: note)
+                            NoteCard(note: note) {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    selectedNote = note
+                                    isNoteDetailPresented = true
+                                }
+                            }
                         }
                     }
                     .padding(.horizontal, 60)
                     .padding(.top, 24)
                 }
+                .scrollIndicators(.never)
             }
             
             // Bottom Bar Component
             BottomBar()
+                .environmentObject(themeManager)
             
             // Floating Search Overlay (does not affect other buttons)
             FloatingSearch(engine: searchEngine)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
                 .padding(.leading, 18)
                 .padding(.bottom, 18)
+            
+            // Note Detail Overlay
+            if isNoteDetailPresented, let note = selectedNote {
+                NoteDetailView(note: note, isPresented: $isNoteDetailPresented)
+                    .transition(.opacity.combined(with: .scale))
+                    .zIndex(100)
+            }
         }
         .frame(minWidth: 1109, minHeight: 782)
+        .preferredColorScheme(themeManager.currentTheme.colorScheme)
         // Search logic will be reintroduced with the redesigned manager
         .onAppear { searchEngine.setNotes(sampleNotes) }
         .onChange(of: sampleNotes) { _, notes in searchEngine.setNotes(notes) }

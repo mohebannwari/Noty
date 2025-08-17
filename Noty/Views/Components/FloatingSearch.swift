@@ -23,6 +23,7 @@ struct FloatingSearch: View {
     @Namespace private var searchNamespace
     @State private var hoveredResultID: SearchHit.ID?
     @State private var isHoveringCollapsedPill = false
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         // Keep a single surface that grows vertically; avoids jumping
@@ -41,15 +42,22 @@ struct FloatingSearch: View {
     }
     
     // MARK: - Search Input
-
+    
     private var currentCornerRadius: CGFloat {
         switch searchState {
         case .collapsed:
-            return 999
+            return 999 // Capsule for collapsed pill
         case .expanded:
-            return 999
+            return 999 // Capsule for expanded without results
         case .withResults:
-            return 24
+            // Adaptive radius based on results count - more results = smaller radius
+            let resultCount = engine.results.count
+            let baseRadius: CGFloat = 32
+            let minRadius: CGFloat = 16
+            let reductionPerResult: CGFloat = 2
+            
+            let adaptiveRadius = max(minRadius, baseRadius - (CGFloat(resultCount) * reductionPerResult))
+            return adaptiveRadius
         }
     }
 
@@ -79,11 +87,11 @@ struct FloatingSearch: View {
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 16))
-                    .foregroundColor(Color(red: 0.078, green: 0.078, blue: 0.078))
+                    .foregroundColor(Color("PrimaryTextColor"))
 
                 Text("Search")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(Color(red: 0.102, green: 0.102, blue: 0.102, opacity: 0.7))
+                    .foregroundColor(Color("SecondaryTextColor"))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
@@ -127,11 +135,11 @@ struct FloatingSearch: View {
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 16))
-                    .foregroundColor(Color(red: 0.078, green: 0.078, blue: 0.078))
+                    .foregroundColor(Color("PrimaryTextColor"))
 
                 TextField("Search", text: $searchText)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(Color(red: 0.102, green: 0.102, blue: 0.102))
+                    .foregroundColor(Color("PrimaryTextColor"))
                     .focused($isSearchFocused)
                     .textFieldStyle(.plain)
                 // Show a delete icon only when results are visible; hide in pure expanded state
@@ -139,7 +147,7 @@ struct FloatingSearch: View {
                     Button(action: { searchText = "" }) {
                         Image(systemName: "delete.left.fill")
                             .font(.system(size: 18))
-                            .background(Color("#000000"))                    }
+                            .foregroundColor(Color("SecondaryTextColor"))                    }
                     .buttonStyle(.plain)
                 }
             }
@@ -149,27 +157,15 @@ struct FloatingSearch: View {
         .background(
             Group {
                 if searchState == .withResults {
-                    // Solid background for results container (no translucency)
+                    // Solid background for proper containment of results
                     RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
-                        .fill(Color.white)
+                        .fill(Color("SearchInputBackgroundColor"))
                         .overlay(
                             RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
-                                .stroke(Color.black.opacity(0.06), lineWidth: 1)
-                        )
-                        // Subtle highlight for "liquid glass" feel
-                        .overlay(
-                            RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
-                                .fill(
-                                    LinearGradient(colors: [
-                                        Color.white.opacity(0.55),
-                                        Color.white.opacity(0.0)
-                                    ], startPoint: .top, endPoint: .bottom)
-                                )
-                                .blendMode(.overlay)
-                                .allowsHitTesting(false)
+                                .stroke(Color.primary.opacity(0.1), lineWidth: 0.5)
                         )
                 } else {
-                    // Keep translucent look for collapsed/expanded bar (no results)
+                    // Glass effect for collapsed/expanded states
                     RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
                         .fill(.ultraThinMaterial)
                         .applyGlassEffect()
@@ -178,7 +174,6 @@ struct FloatingSearch: View {
             }
         )
         .clipShape(RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous))
-        .compositingGroup()
         .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1.5)
         .frame(maxWidth: 300)
         // ESC to close the bar (replaces 'x' in expanded state)
@@ -195,8 +190,8 @@ struct FloatingSearch: View {
     private func resultRow(_ result: SearchHit) -> some View {
         let isHovered = hoveredResultID == result.id
         return HStack(spacing: 12) {
-            // Asset-based thumbnail
-            Image("note-card-thumbnail")
+            // Asset-based thumbnail with dark mode support
+            Image(colorScheme == .dark ? "note-card-thumbnail-DM" : "note-card-thumbnail")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 18, height: 22)
@@ -204,7 +199,7 @@ struct FloatingSearch: View {
 
             Text(result.note.title)
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(Color(red: 0.102, green: 0.102, blue: 0.102))
+                .foregroundColor(Color("PrimaryTextColor"))
                 .lineLimit(1)
 
             Spacer()
@@ -212,7 +207,7 @@ struct FloatingSearch: View {
             // Hover affordance to indicate navigation
             Image(systemName: "arrow.right.circle.fill")
                 .font(.system(size: 13, weight: .semibold))
-                .background(Color("#000000"))
+                .foregroundColor(Color("PrimaryTextColor"))
                 .opacity(isHovered ? 1 : 0)
         }
         .padding(.vertical, 12)
@@ -222,7 +217,9 @@ struct FloatingSearch: View {
             Group {
                 if isHovered {
                     RoundedRectangle(cornerRadius: hoverCornerRadius, style: .continuous)
-                        .fill(Color(red: 0.925, green: 0.925, blue: 0.925)) // #ECECEC
+                        .fill(colorScheme == .dark ? 
+                              Color(red: 0.149, green: 0.149, blue: 0.161) : // #262629 for dark mode
+                              Color(red: 0.945, green: 0.945, blue: 0.945))   // #F1F1F1 for light mode
                 }
             }
         )
@@ -269,7 +266,7 @@ extension View {
     @ViewBuilder
     func applyGlassEffect() -> some View {
         if #available(macOS 26.0, *) {
-            self.glassEffect(.regular)
+            self.glassEffect(.regular.interactive())
         } else {
             self
         }

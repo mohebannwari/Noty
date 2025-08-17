@@ -9,24 +9,26 @@ import SwiftUI
 
 struct NoteCard: View {
     let note: Note
+    let onTap: () -> Void
     @State private var isHovering = false
     
     var body: some View {
-        ZStack(alignment: .bottom) {
+        Button(action: onTap) {
+            ZStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     HStack(spacing: 4) {
                         Image(systemName: "calendar")
                             .font(.system(size: 10))
-                            .foregroundColor(Color(red: 0.322, green: 0.322, blue: 0.357))
+                            .foregroundColor(Color("TertiaryTextColor"))
                         
                         Text(dateFormatter.string(from: note.date))
                             .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(Color(red: 0.322, green: 0.322, blue: 0.357))
+                            .foregroundColor(Color("TertiaryTextColor"))
                     }
                     .padding(.horizontal, 6)
                     .padding(.vertical, 4)
-                    .background(Color(red: 0.102, green: 0.102, blue: 0.102, opacity: 0.06))
+                    .background(Color("SurfaceTranslucentColor"))
                     .clipShape(Capsule())
                     
                     Spacer()
@@ -52,9 +54,9 @@ struct NoteCard: View {
                     } label: {
                         Image(systemName: "ellipsis")
                             .font(.system(size: 12))
-                            .foregroundColor(Color(red: 0.102, green: 0.102, blue: 0.102, opacity: 0.7))
+                            .foregroundColor(Color("MenuButtonColor"))
                             .frame(width: 24, height: 24)
-                            .background(Color(red: 0.102, green: 0.102, blue: 0.102, opacity: 0.06), in: Circle())
+                            .background(Color("SurfaceTranslucentColor"), in: Circle())
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
@@ -62,32 +64,55 @@ struct NoteCard: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(note.title)
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(Color(red: 0.102, green: 0.102, blue: 0.102))
+                        .foregroundColor(Color("PrimaryTextColor"))
                         .lineLimit(1)
                     
-                    Text(note.content)
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(Color(red: 0.102, green: 0.102, blue: 0.102, opacity: 0.7))
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                        .mask(
-                            VStack(spacing: 0) {
-                                Rectangle()
-                                    .fill(Color.black)
-                                
+                    ZStack(alignment: .topLeading) {
+                        // Base clear text
+                        Text(note.content)
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color("SecondaryTextColor"))
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        
+                        // Progressive blur overlay
+                        Text(note.content)
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color("SecondaryTextColor"))
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                            .blur(radius: 2.0)
+                            .mask(
                                 LinearGradient(
                                     gradient: Gradient(stops: [
-                                        .init(color: Color.black, location: 0.0),
-                                        .init(color: Color.black.opacity(0.7), location: 0.3),
-                                        .init(color: Color.black.opacity(0.3), location: 0.7),
-                                        .init(color: Color.clear, location: 1.0)
+                                        .init(color: Color.clear, location: 0.0),
+                                        .init(color: Color.clear, location: 0.6),
+                                        .init(color: Color.black.opacity(0.3), location: 0.8),
+                                        .init(color: Color.black.opacity(0.7), location: 1.0)
                                     ]),
                                     startPoint: .top,
                                     endPoint: .bottom
                                 )
-                                .frame(height: 60)
-                            }
-                        )
+                            )
+                    }
+                    .mask(
+                        VStack(spacing: 0) {
+                            Rectangle()
+                                .fill(Color.black)
+                            
+                            LinearGradient(
+                                gradient: Gradient(stops: [
+                                    .init(color: Color.black, location: 0.0),
+                                    .init(color: Color.black.opacity(0.7), location: 0.3),
+                                    .init(color: Color.black.opacity(0.3), location: 0.7),
+                                    .init(color: Color.clear, location: 1.0)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .frame(height: 60)
+                        }
+                    )
                 }
             }
             
@@ -101,16 +126,16 @@ struct NoteCard: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "tag.fill")
                                     .font(.system(size: 10))
-                                    .foregroundColor(Color(red: 0.149, green: 0.388, blue: 0.925))
+                                    .foregroundColor(Color("AccentColor"))
                                 
                                 Text(tag)
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(Color(red: 0.102, green: 0.102, blue: 0.102))
+                                    .foregroundColor(Color("PrimaryTextColor"))
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(.ultraThinMaterial, in: Capsule())
-                            .background(Color(red: 0.376, green: 0.647, blue: 0.980, opacity: 0.2))
+                            .background(Color("AccentColor").opacity(0.2))
                             .clipShape(Capsule())
                         }
                         Spacer()
@@ -120,7 +145,7 @@ struct NoteCard: View {
         }
         .padding(.all, 12)
         .frame(width: 222, height: 182, alignment: .topLeading)
-        .background(Color.white)
+        .background(Color("CardBackgroundColor"))
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .scaleEffect(isHovering ? 1.02 : 1.0)
         .shadow(
@@ -135,6 +160,8 @@ struct NoteCard: View {
             x: 0,
             y: 15
         )
+        }
+        .buttonStyle(.plain)
         .onHover { hovering in
             isHovering = hovering
         }
