@@ -8,19 +8,19 @@
 import SwiftUI
 
 struct BottomBar: View {
+    var onNewNote: () -> Void
     @State private var isHoveringNewNote = false
     @State private var isHoveringTheme = false
     @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.clear.ignoresSafeArea()
 
             // Search pill is provided by FloatingSearch; remove duplicate button
 
             // Independent: Bottom-center New note
             Button {
-                // New note functionality will be implemented
+                onNewNote()
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "plus.circle.fill")

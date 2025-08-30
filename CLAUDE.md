@@ -102,9 +102,36 @@ struct ComponentName: View {
 ```
 
 ### Reusable Patterns
-**Card Pattern**:
+**Card Pattern (Liquid Glass - iOS 26+/macOS 26+)**:
 ```swift
-.background(Color.white)
+.glassEffect(.regular, in: RoundedRectangle(cornerRadius: 24))
+```
+
+**Card Pattern (visionOS 2.4+)**:
+```swift
+.glassBackgroundEffect(
+    .feathered(padding: 8, softEdgeRadius: 4),
+    in: RoundedRectangle(cornerRadius: 24),
+    displayMode: .always
+)
+```
+
+**Card Pattern (Cross-platform with SwiftGlass)**:
+```swift
+.glass(
+    radius: 24,
+    color: .white,
+    material: .ultraThinMaterial,
+    gradientOpacity: 0.5,
+    shadowColor: .black.opacity(0.1),
+    shadowRadius: 10,
+    shadowY: 5
+)
+```
+
+**Card Pattern (Legacy Fallback)**:
+```swift
+.background(.ultraThinMaterial)
 .clipShape(RoundedRectangle(cornerRadius: 24))
 .shadow(color: Color.black.opacity(0.02), radius: 9.5, x: 0, y: 9)
 .shadow(color: Color.black.opacity(0.02), radius: 17.5, x: 0, y: 35)
@@ -141,7 +168,7 @@ Button(action: {}) {
 - **Native SwiftUI**: Use SwiftUI's built-in styling system
 - **Color Assets**: Semantic colors defined in Assets.xcassets
 - **System Fonts**: Use `.system()` font family for consistency
-- **Material Effects**: Use `.ultraThinMaterial` for floating elements
+- **Material Effects**: Use **Liquid Glass** for all floating UI elements (iOS 26+, macOS 26+, visionOS 2.4+). For legacy platforms, use `.ultraThinMaterial` as fallback
 
 ## 4. Asset Management
 
@@ -210,42 +237,252 @@ withAnimation(.bouncy(duration: 0.6)) {
 .animation(.bouncy(duration: 0.6), value: stateVariable)
 ```
 
-### Liquid Glass Morphing Animations
-For morphing between glass elements, follow Apple's morphing pattern:
+## 6.1. Apple Liquid Glass System (2025)
 
+Apple's Liquid Glass represents the biggest visual update to iOS since iOS 7, introducing a translucent material that behaves like real glass. This material dynamically adapts to surrounding content, responds to light changes, and uses real-time rendering with specular highlights.
+
+### Core Liquid Glass Principles
+- **Dynamic Adaptation**: Material intelligently adapts between light and dark environments
+- **Real-time Rendering**: Uses hardware acceleration for smooth animations
+- **Environmental Refraction**: Reacts to background content with appropriate blur and reflection
+- **Fluid Morphing**: Seamlessly transforms between different glass shapes during state transitions
+
+### Platform Availability
+- **iOS 26+, macOS 26+**: Native `.glassEffect()` API with enhanced toolbar support
+- **visionOS 2.4+**: Enhanced `.glassBackgroundEffect()` with morphing capabilities
+- **Legacy Platforms**: SwiftGlass library provides compatible implementation
+
+### Basic Liquid Glass Implementation
+
+#### Native Apple Glass Effects (iOS 26+, macOS 26+)
 ```swift
-struct ComponentWithMorphing: View {
-    @State private var morphState: Bool = false
+import SwiftUI
+
+struct ModernGlassView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("Liquid Glass")
+                .font(.system(size: 17, weight: .medium))
+            
+            Image(systemName: "sparkles")
+                .font(.system(size: 16))
+        }
+        .padding(.all, 24)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 24))
+    }
+}
+```
+
+#### visionOS Glass Effects (visionOS 2.4+)
+```swift
+import SwiftUI
+
+struct VisionGlassView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("Vision Glass")
+                .font(.system(size: 17, weight: .medium))
+        }
+        .padding(.all, 24)
+        .glassBackgroundEffect(
+            .feathered(padding: 16, softEdgeRadius: 8),
+            in: RoundedRectangle(cornerRadius: 24),
+            displayMode: .always
+        )
+    }
+}
+```
+
+#### SwiftGlass Implementation (Cross-platform)
+```swift
+import SwiftUI
+import SwiftGlass
+
+struct UniversalGlassView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("Universal Glass")
+                .font(.system(size: 17, weight: .medium))
+        }
+        .padding(.all, 24)
+        .glass(
+            radius: 24,
+            color: .white,
+            material: .ultraThinMaterial,
+            gradientOpacity: 0.5,
+            shadowColor: .black.opacity(0.1),
+            shadowRadius: 10,
+            shadowY: 5
+        )
+    }
+}
+```
+
+### Advanced Glass Morphing Animations
+
+#### Glass Container with Morphing
+```swift
+struct LiquidGlassMorphingView: View {
+    @State private var isExpanded: Bool = false
     @Namespace private var glassNamespace
     
     var body: some View {
         GlassEffectContainer(spacing: 12) {
             VStack(spacing: 12) {
-                if morphState {
+                // Base element always present
+                SearchBar()
+                    .glassEffect(.regular.interactive())
+                    .glassEffectID("searchBar", in: glassNamespace)
+                
+                // Conditional morphing element
+                if isExpanded {
                     SearchResults()
                         .glassEffect(.regular)
                         .glassEffectID("searchResults", in: glassNamespace)
+                        .transition(.asymmetric(
+                            insertion: .scale.combined(with: .opacity),
+                            removal: .scale.combined(with: .opacity)
+                        ))
                 }
-                
-                SearchInput()
-                    .glassEffect(.regular.interactive())
-                    .glassEffectID("searchInput", in: glassNamespace)
             }
         }
-        .onChange(of: searchText) {
-            withAnimation(.bouncy) {
-                morphState = !searchText.isEmpty
+        .onTapGesture {
+            withAnimation(.bouncy(duration: 0.8)) {
+                isExpanded.toggle()
             }
         }
     }
 }
 ```
 
-**Requirements for Morphing**:
-- Use `GlassEffectContainer` wrapper
-- Assign unique `glassEffectID` with shared `@Namespace`  
-- Use `withAnimation(.bouncy)` for state transitions
-- State changes automatically trigger glass morphing
+#### Matched Geometry Glass Morphing
+```swift
+struct GeometryMatchedGlass: View {
+    @State private var selectedCard: String? = nil
+    @Namespace private var cardNamespace
+    
+    var body: some View {
+        if let selectedCard = selectedCard {
+            // Expanded view
+            DetailView(cardId: selectedCard)
+                .glassEffect(.thick)
+                .matchedGeometryEffect(
+                    id: selectedCard,
+                    in: cardNamespace,
+                    properties: .frame
+                )
+                .transition(.asymmetric(
+                    insertion: .scale(scale: 0.8).combined(with: .opacity),
+                    removal: .scale(scale: 1.2).combined(with: .opacity)
+                ))
+                .onTapGesture {
+                    withAnimation(.smooth(duration: 0.6)) {
+                        selectedCard = nil
+                    }
+                }
+        } else {
+            // Grid view
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2)) {
+                ForEach(cards, id: \.id) { card in
+                    CardView(card: card)
+                        .glassEffect(.regular)
+                        .matchedGeometryEffect(
+                            id: card.id,
+                            in: cardNamespace,
+                            properties: .frame
+                        )
+                        .onTapGesture {
+                            withAnimation(.smooth(duration: 0.6)) {
+                                selectedCard = card.id
+                            }
+                        }
+                }
+            }
+        }
+    }
+}
+```
+
+### Glass Effect Hierarchy and Best Practices
+
+#### Optimal Glass Usage
+```swift
+struct OptimalGlassLayout: View {
+    var body: some View {
+        ZStack {
+            // Background content
+            ContentView()
+            
+            VStack {
+                // Floating toolbar - perfect for liquid glass
+                Toolbar()
+                    .glassEffect(.bar, isInToolbar: true)
+                
+                Spacer()
+                
+                // Bottom bar with glass morphing
+                BottomNavigationBar()
+                    .glassEffect(.regular.interactive())
+            }
+            .ignoresSafeArea(.container, edges: .bottom)
+        }
+    }
+}
+```
+
+#### Glass Design Guidelines
+- **Use for floating elements**: Toolbars, overlays, modal sheets, navigation bars
+- **Avoid glass-on-glass stacking**: Multiple layers break the material illusion
+- **Avoid in scrollable content**: Don't use glass for list items or table cells
+- **Respect system behavior**: Glass automatically adapts to system dark/light mode
+
+### Animation Timing and Curves
+
+#### Recommended Animation Types
+```swift
+// Bouncy animations for interactive elements
+withAnimation(.bouncy(duration: 0.6, extraBounce: 0.2)) {
+    // Glass morphing state changes
+}
+
+// Smooth animations for transitions
+withAnimation(.smooth(duration: 0.8)) {
+    // Card expansions and navigation
+}
+
+// Snappy animations for quick interactions
+withAnimation(.snappy(duration: 0.3)) {
+    // Button presses and toggles
+}
+```
+
+### Platform-Specific Optimizations
+
+#### iOS 26+ / macOS 26+ Features
+- Native `.glassEffect()` with hardware acceleration
+- Automatic toolbar integration with `isInToolbar: true`
+- System-aware color adaptation
+- Enhanced performance in scroll views
+
+#### visionOS 2.4+ Features
+- Advanced `.glassBackgroundEffect()` variants:
+  - `.automatic`: System-determined glass appearance
+  - `.feathered(padding:softEdgeRadius:)`: Soft-edge glass with padding
+  - `.plate`: Clean, minimal glass appearance
+- 3D depth awareness with z-axis layout influence
+- Enhanced display modes: `.always`, `.implicit`, `.never`
+
+#### Legacy Platform Support
+- SwiftGlass library maintains visual consistency
+- Cross-platform color system adaptation
+- Performance-optimized blur and shadow effects
+- Automatic material selection based on system capabilities
+
+**Implementation Requirements**:
+- Use `GlassEffectContainer` for morphing between multiple glass elements
+- Assign unique `glassEffectID` with shared `@Namespace` for smooth transitions
+- Prefer `.bouncy` and `.smooth` animations for glass state changes
+- Test across all target platforms to ensure consistent behavior
 
 ## 7. Project Structure
 
@@ -342,8 +579,13 @@ struct GeneratedComponent: View {
 
 ## 10. Coding Guidelines
 
-### Styling Memory
-- Always work with the newest `.glassEffect()`
-- **Overwrite the design styles of figma components with liquid glass where possible, as long as the new SDK is provided!**
+### Apple Liquid Glass Priority (2025 Update)
+- **PRIMARY**: Always use Apple's native Liquid Glass APIs when available:
+  - iOS 26+/macOS 26+: `.glassEffect()` 
+  - visionOS 2.4+: `.glassBackgroundEffect()`
+- **FALLBACK**: Use SwiftGlass library for cross-platform compatibility
+- **LEGACY**: Use `.ultraThinMaterial` only when glass effects are not available
+- **OVERRIDE RULE**: Replace all traditional material backgrounds with Liquid Glass for floating UI elements
+- **DESIGN INTEGRATION**: When generating code from Figma, prioritize Liquid Glass over static backgrounds for cards, toolbars, sheets, and overlays
 
 This design system ensures consistent, maintainable, and scalable UI development while enabling seamless Figma integration through the Model Context Protocol.

@@ -217,9 +217,7 @@ struct FloatingSearch: View {
             Group {
                 if isHovered {
                     RoundedRectangle(cornerRadius: hoverCornerRadius, style: .continuous)
-                        .fill(colorScheme == .dark ? 
-                              Color(red: 0.149, green: 0.149, blue: 0.161) : // #262629 for dark mode
-                              Color(red: 0.945, green: 0.945, blue: 0.945))   // #F1F1F1 for light mode
+                        .fill(Color("HoverBackgroundColor"))
                 }
             }
         )
@@ -265,9 +263,10 @@ struct FloatingSearch: View {
 extension View {
     @ViewBuilder
     func applyGlassEffect() -> some View {
-        if #available(macOS 26.0, *) {
+        if #available(iOS 18.0, macOS 15.0, *) {
             self.glassEffect(.regular.interactive())
         } else {
+            // Fallback: keep ultraThinMaterial-only surfaces as-is
             self
         }
     }
