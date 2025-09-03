@@ -27,6 +27,10 @@ struct NoteDetailView: View {
     @State private var hoveredTag: String?
     @State private var pressedTag: String?
     @State private var selectedTags: Set<String> = []
+    
+    // Edit toolbar state
+    @State private var isEditToolbarExpanded = false
+    @StateObject private var textFormattingManager = TextFormattingManager()
 
     init(note: Note, isPresented: Binding<Bool>, onSave: @escaping (Note) -> Void) {
         self.note = note
@@ -90,8 +94,7 @@ struct NoteDetailView: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Color("PrimaryTextColor"))
                     .frame(width: 32, height: 32)
-                    .adaptiveGlass(in: Circle())
-                    .applyGlassEffect()
+                    .liquidGlass(in: Circle())
                     .scaleEffect(glassElementsVisible ? 1 : 0.9)
                     .opacity(glassElementsVisible ? 1 : 0)
             }
@@ -210,24 +213,24 @@ struct NoteDetailView: View {
 
     // MARK: - Content
     private var contentEditor: some View {
-        TodoRichTextEditor(text: $editedContent)
-            .padding(.top, 4)
+        TodoRichTextEditor(
+            text: $editedContent,
+            onToolbarAction: handleEditToolAction
+        )
+        .padding(.top, 4)
     }
 
     // MARK: - Bottom Controls
     private var bottomGlassControls: some View {
         HStack(spacing: 12) {
-            Button(action: {}) {
-                Text("Aa")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color("PrimaryTextColor"))
-                    .frame(width: 44, height: 44)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .applyGlassEffect()
-                    .scaleEffect(bottomControlsExpanded ? 1 : 0.7)
-                    .opacity(bottomControlsExpanded ? 1 : 0)
-            }
-            .buttonStyle(.plain)
+            // Edit toolbar
+            EditToolbar(
+                isExpanded: $isEditToolbarExpanded,
+                onToolAction: handleEditToolAction,
+                onLinkInsert: handleLinkInsert
+            )
+            .scaleEffect(bottomControlsExpanded ? 1 : 0.7)
+            .opacity(bottomControlsExpanded ? 1 : 0)
 
             Spacer()
 
@@ -237,8 +240,7 @@ struct NoteDetailView: View {
                         .font(.system(size: 20))
                         .foregroundColor(Color("PrimaryTextColor"))
                         .frame(width: 44, height: 44)
-                        .background(.ultraThinMaterial, in: Circle())
-                        .applyGlassEffect()
+                        .liquidGlass(in: Circle())
                         .scaleEffect(bottomControlsExpanded ? 1 : 0.7)
                         .opacity(bottomControlsExpanded ? 1 : 0)
                 }
@@ -265,8 +267,7 @@ struct NoteDetailView: View {
                             )
                     }
                     .frame(width: 44, height: 44)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .applyGlassEffect()
+                    .liquidGlass(in: Circle())
                     .scaleEffect(bottomControlsExpanded ? 1 : 0.7)
                     .opacity(bottomControlsExpanded ? 1 : 0)
                 }
@@ -339,6 +340,48 @@ struct NoteDetailView: View {
             let date = dateFormatter.string(from: note.date)
             return "Edited \(date) at \(time)"
         }
+    }
+    
+    private func handleEditToolAction(_ tool: EditTool) {
+        // For now, we'll implement basic functionality
+        // In a full implementation, this would interact with the text editor
+        switch tool {
+        case .titleCase:
+            editedContent = editedContent.capitalized
+        case .bold:
+            // Toggle markdown bold syntax for selected text
+            // This is a simplified implementation
+            if !editedContent.contains("**") {
+                editedContent = "**\(editedContent)**"
+            }
+        case .italic:
+            if !editedContent.contains("*") && !editedContent.contains("**") {
+                editedContent = "*\(editedContent)*"
+            }
+        case .bulletList:
+            // Add bullet point to current line
+            let lines = editedContent.components(separatedBy: .newlines)
+            if let lastLine = lines.last, !lastLine.hasPrefix("• ") {
+                editedContent = editedContent + "\n• "
+            }
+        case .todo:
+            // Trigger todo insertion via notification
+            NotificationCenter.default.post(name: Notification.Name("TodoToolbarAction"), object: nil)
+        case .divider:
+            editedContent = editedContent + "\n---\n"
+        case .lineBreak:
+            editedContent = editedContent + "\n"
+        default:
+            // For other tools, we'll implement them later when we have NSTextView integration
+            break
+        }
+    }
+    
+    private func handleLinkInsert(_ url: String) {
+        // Create a web clip element in the content
+        // This will be processed by the TodoRichTextEditor to render as a thumbnail
+        let webClipMarkdown = "\n[webclip](\(url))\n"
+        editedContent = editedContent + webClipMarkdown
     }
 }
 

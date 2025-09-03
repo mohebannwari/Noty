@@ -2,6 +2,32 @@
 
 *This file contains the implementation rules and patterns for Apple's Liquid Glass effects in the Noty app.*
 
+**Last Updated:** September 2, 2025
+
+---
+
+## Latest Updates from WWDC 2025
+
+### What is Liquid Glass?
+Apple's Liquid Glass, announced at WWDC 2025 (June 9), represents the biggest visual overhaul since iOS 7 in 2013. It's a dynamic material that combines the optical properties of glass with a sense of fluidity, using real-time rendering with specular highlights that dynamically react to movement.
+
+### Cross-Platform Availability
+- **iOS 26, iPadOS 26, macOS 26** (Tahoe), **watchOS 26, tvOS 26**
+- First unified design language across all Apple platforms
+- Maintains distinct qualities for each platform while establishing harmony
+
+### Performance Improvements (iOS 26+/macOS 26+)
+- **40% reduction in GPU usage** with Liquid Glass effects
+- **39% faster render times** (10.2ms vs 16.7ms)
+- **38% less memory usage** (28MB vs 45MB)
+- Improved scroll performance with new instruments
+
+### Beta Updates (August 2025)
+- iOS 26 beta 5 shows Apple's commitment to the design
+- Expanded to more UI elements
+- Adjusted transparency for better legibility after accessibility feedback
+- What we see in beta 5 is largely what Apple plans to ship
+
 ---
 
 Here is a properly structured documentation summary of the video “Liquid Glass - 5 Things You MUST Know Before Implementing” by Sean Allen, strictly focused on practical and implementation-relevant details for Claude code or internal team adoption. Most marketing content and sponsorships are omitted, and points are structured for clear integration into your engineering documentation or guidelines.
@@ -75,6 +101,17 @@ This document summarizes and standardizes the best practices for implementing Ap
 - Test all colors, glass effects, and iconography for accessibility and legibility in both light/dark modes.
 - Avoid over-customizing; leverage system defaults wherever possible for best cross-platform results.
 
+### Future Implications
+- **AR Glasses Connection**: Bloomberg reports Liquid Glass is laying groundwork for Apple's rumored AR glasses (2026)
+- **Vision Pro Influence**: Design draws strong inspiration from visionOS visual language
+- **20th Anniversary iPhone**: Expected to showcase Liquid Glass prominently
+
+### Developer Resources
+- **Xcode 26**: Required for full Liquid Glass implementation
+- **Icon Composer**: New tool for creating unified glass app icons
+- **Developer APIs**: Available via SwiftUI, UIKit, and AppKit
+- **Documentation**: developer.apple.com for latest guidelines
+
 ### Disclaimer
 Not all APIs shown in demos may be available in production releases. Verify with the current SDK/Xcode version before relying on a given modifier or layout primitive.
 
@@ -110,7 +147,18 @@ This document is fit for prompt injection into Claude or for training engineerin
 - Supports automatic search field activation
 - Flexible placement options (sidebar, tab bar, navigation bar)
 
-## SwiftUI Implementation Patterns
+## SwiftUI Implementation Patterns (iOS 26+/macOS 26+)
+
+### Native SwiftUI APIs
+- **`.glassEffect()`**: Default glass effect with `.regular` style and `Capsule` shape
+- **`.glassEffect(.thin, in: RoundedRectangle(cornerRadius: 20))`**: Custom glass thickness and shape
+- **`.glassEffect(.regular.interactive(true))`**: Interactive glass that responds to touch
+- **`GlassEffectContainer`**: Combine multiple glass shapes for morphing animations
+- **`.glassEffectID()`**: Assign unique IDs for coordinated animations
+- **`.glassBackgroundEffect()`**: visionOS 2.4+ specific implementation
+- **Button Styles**: `.buttonStyle(.glass)` or `.buttonStyle(.glassProminent)`
+
+### UIKit/AppKit Fallbacks
 - **UIVisualEffectView**: Use `UIVisualEffectView` and `UIGlassEffect`
 - **Animation**: Animate effect setting for materialize/dematerialize transitions
 - **Interactive Support**: Support interactive behaviors with `isInteractive = true`
@@ -197,10 +245,12 @@ A harmonized, adaptive, and expressive design language for Apple apps and platfo
 - **Standard Controls**  
   - Bordered/capsule buttons by default, consistent sizes across platforms  
   - Use `.buttonBorderShape()`, `.controlSize()`, `.glassEffect()`, `.glassProminent()`
+  - Controls dynamically shrink/expand when scrolling for focus management
 - **Custom UI Elements**
   - Use `GlassEffectContainer` for multiple glass elements (better performance, correct visual blending)
   - Use `glassEffectID` for coordinated animations
   - Use `interactive()` modifier for touch responses
+  - Glass elements blend and merge like "droplets of water"
 
 ## 3. Apple Intelligence & Machine Learning
 

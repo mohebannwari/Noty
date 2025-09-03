@@ -7,32 +7,6 @@
 
 import SwiftUI
 
-// MARK: - Backward Compatibility Extension
-extension View {
-    @ViewBuilder
-    func adaptiveGlass(in shape: some Shape) -> some View {
-        if #available(iOS 18.0, macOS 15.0, *) {
-            self.glassEffect(.regular, in: shape)
-        } else {
-            self.background(.ultraThinMaterial, in: shape)
-                .overlay(shape.stroke(.quaternary))
-        }
-    }
-    
-    @ViewBuilder
-    func conditionalGlassEffect(shouldApply: Bool) -> some View {
-        if shouldApply {
-            if #available(iOS 18.0, macOS 15.0, *) {
-                self.glassEffect(.regular.interactive())
-            } else {
-                self
-            }
-        } else {
-            self
-        }
-    }
-}
-
 struct ContentView: View {
     // Search is powered by SearchEngine
     @StateObject private var searchEngine = SearchEngine()

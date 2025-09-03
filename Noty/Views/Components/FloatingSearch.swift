@@ -95,12 +95,8 @@ struct FloatingSearch: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .applyGlassEffect()
-                    .matchedGeometryEffect(id: "searchSurface", in: searchNamespace)
-            )
+            .liquidGlass(in: RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous))
+            .matchedGeometryEffect(id: "searchSurface", in: searchNamespace)
             .scaleEffect(isHoveringCollapsedPill ? 1.05 : 1.0)
             .shadow(
                 color: Color.black.opacity(isHoveringCollapsedPill ? 0.12 : 0.05),
@@ -154,25 +150,20 @@ struct FloatingSearch: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 12)
         }
-        .background(
-            Group {
-                if searchState == .withResults {
-                    // Solid background for proper containment of results
-                    RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
-                        .fill(Color("SearchInputBackgroundColor"))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
-                                .stroke(Color.primary.opacity(0.1), lineWidth: 0.5)
-                        )
-                } else {
-                    // Glass effect for collapsed/expanded states
-                    RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                        .applyGlassEffect()
-                        .matchedGeometryEffect(id: "searchSurface", in: searchNamespace)
-                }
-            }
-        )
+        .if(searchState == .withResults) { view in
+            view.background(
+                RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
+                    .fill(Color("SearchInputBackgroundColor"))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous)
+                            .stroke(Color.primary.opacity(0.1), lineWidth: 0.5)
+                    )
+            )
+        }
+        .if(searchState != .withResults) { view in
+            view.liquidGlass(in: RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous))
+                .matchedGeometryEffect(id: "searchSurface", in: searchNamespace)
+        }
         .clipShape(RoundedRectangle(cornerRadius: currentCornerRadius, style: .continuous))
         .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1.5)
         .frame(maxWidth: 300)
@@ -258,16 +249,15 @@ struct FloatingSearch: View {
     }
 }
 
-// MARK: - Glass Effect Extension
-
+// MARK: - View Extension for Conditional Modifiers
 extension View {
     @ViewBuilder
-    func applyGlassEffect() -> some View {
-        if #available(iOS 18.0, macOS 15.0, *) {
-            self.glassEffect(.regular.interactive())
+    func `if`<Transform: View>(_ condition: Bool, transform: (Self) -> Transform) -> some View {
+        if condition {
+            transform(self)
         } else {
-            // Fallback: keep ultraThinMaterial-only surfaces as-is
             self
         }
     }
 }
+

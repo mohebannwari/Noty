@@ -57,7 +57,7 @@ struct BottomBar: View {
                     .font(.system(size: 16))
                     .foregroundColor(Color("PrimaryTextColor"))
                     .frame(width: 40, height: 40)
-                    .adaptiveGlass(in: Circle())
+                    .liquidGlass(in: Circle())
                     .scaleEffect(isHoveringTheme ? 1.1 : 1.0)
                     .shadow(
                         color: Color.black.opacity(isHoveringTheme ? 0.08 : 0.05),
